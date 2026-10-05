@@ -1,0 +1,40 @@
+# Unreal Engine 5 generated folders
+Binaries/
+Build/
+DerivedDataCache/
+Intermediate/
+Saved/
+.vs/
+.idea/
+.vscode/
+
+# Plugins build output
+Plugins/**/Binaries/
+Plugins/**/Intermediate/
+
+# Generated IDE / solution files
+*.sln
+*.suo
+*.opensdf
+*.sdf
+*.VC.db
+*.VC.opendb
+*.xcodeproj
+*.xcworkspace
+*.code-workspace
+.vsconfig
+
+# Compiled / debug artifacts
+*.pdb
+*.ilk
+*.exp
+
+# Packaged builds (distribute via GitHub Releases instead)
+/Packaged/
+/Package/
+/Builds/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
