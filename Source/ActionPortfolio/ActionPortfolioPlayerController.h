@@ -4,10 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "LockOnComponent.h"
+#include "LockOnTestActor.h"
 #include "ActionPortfolioPlayerController.generated.h"
 
 class UInputMappingContext;
 class UUserWidget;
+class UInputAction;
 
 /**
  *  Basic PlayerController class for a third person game
@@ -18,7 +21,12 @@ class AActionPortfolioPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 	
+	AActionPortfolioPlayerController();
+
 protected:
+
+	UPROPERTY(BlueprintReadOnly,EditAnywhere) TObjectPtr<ULockOnComponent> LockOnComponent;
+	UPROPERTY(EditAnywhere, Category = "Input") UInputAction* LockOnAction;
 
 	/** Input Mapping Contexts */
 	UPROPERTY(EditAnywhere, Category ="Input|Input Mappings")
@@ -40,6 +48,8 @@ protected:
 	UPROPERTY(EditAnywhere, Config, Category = "Input|Touch Controls")
 	bool bForceTouchControls = false;
 
+	void ToggleLockOn();
+
 	/** Gameplay initialization */
 	virtual void BeginPlay() override;
 
@@ -48,5 +58,4 @@ protected:
 
 	/** Returns true if the player should use UMG touch controls */
 	bool ShouldUseTouchControls() const;
-
 };

@@ -4,7 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "LockOnComponent.h"
 #include "TEST_Actor.generated.h"
+
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOntimerTick);
 
 UCLASS()
 class ACTIONPORTFOLIO_API ATEST_Actor : public AActor
@@ -23,4 +27,23 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere) int TEST_Variable;
+
+	UPROPERTY(EditAnywhere) TObjectPtr<AActor> ObjectPtr_TEST_A;
+	UPROPERTY(EditAnywhere) TObjectPtr<AActor> ObjectPtr_TEST_B;
+	UPROPERTY(EditAnywhere) TWeakObjectPtr<AActor> WeakObjectPtr_TEST;
+	
+	UPROPERTY(BlueprintAssignable) FOntimerTick OnTimerTick;
+
+	AActor* RawTarget;
+
+	FTimerHandle LogTimerHandle;
+
+	void LogTargets();
+
+	UFUNCTION()
+	void HandleTargetDestroyed(AActor* DestroyedActor);
+
+
+	//Components
+	UPROPERTY(BlueprintReadOnly,VisibleAnywhere) TObjectPtr<ULockOnComponent> LockOn;
 };
