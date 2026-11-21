@@ -4,13 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "LockOnTarget.h"
 #include "LockOnTestActor.generated.h"
 
 class UStaticMeshComponent;
 class UMaterialInterface;
 
 UCLASS()
-class ACTIONPORTFOLIO_API ALockOnTestActor : public AActor
+class ACTIONPORTFOLIO_API ALockOnTestActor : public AActor, public ILockOnTarget
 {
 	GENERATED_BODY()
 	
@@ -35,5 +36,11 @@ public:
 	UPROPERTY(EditAnywhere , Category = "Material")
 	UMaterialInterface* LockedOnMaterial;
 
+	virtual void OnLockedOn_Implementation() override;
+	virtual void OnLockReleased_Implementation() override;
+
+private:
 	void ChangeLockOnMaterial(bool IsLockedOn);
+
+
 };

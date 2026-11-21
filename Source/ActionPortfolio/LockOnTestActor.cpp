@@ -44,6 +44,16 @@ void ALockOnTestActor::Tick(float DeltaTime)
 
 }
 
+void ALockOnTestActor::OnLockedOn_Implementation()
+{
+	ChangeLockOnMaterial(true);
+}
+
+void ALockOnTestActor::OnLockReleased_Implementation()
+{
+	ChangeLockOnMaterial(false);
+}
+
 void ALockOnTestActor::ChangeLockOnMaterial(bool IsLockedOn)
 {
 	if (IsLockedOn)

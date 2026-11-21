@@ -2,6 +2,7 @@
 
 
 #include "LockOnComponent.h"
+#include "LockOnTarget.h"
 #include "Kismet/GameplayStatics.h"
 
 // Sets default values for this component's properties
@@ -34,63 +35,69 @@ void ULockOnComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	// ...
 }
 
-void ULockOnComponent::SetTarget(const FVector& FindTargetStartPosition)
-{
-	AActor* NewLockOnActor = FindLockOnTarget(FindTargetStartPosition);
-	if (NewLockOnActor != nullptr)
-	{
-		//기존의 락온 액터가 이미 있다면
-		if (LockOnActor.IsValid())
-		{
-
-			//이미 있고 새로 찾은 액터랑 기존 액터가 같다면, 락온 해제
-			if (LockOnActor == NewLockOnActor)
-			{
-				//이미 LockOnActor가 존재하고, 이게 새로들어온 NewLockOnActor랑 같으면 락온 토글 해제
-				LockOnActor->OnDestroyed.RemoveDynamic(this, &ULockOnComponent::TargetReleased);
-				LockOnActor.Reset();
-				OnLockOnChanged.Broadcast(nullptr);
-				UE_LOG(LogTemp, Warning, TEXT("SameTarget Lock On OFF"));
-				return;
-			}
-			//이미 있는데 새로 찾은 액터랑 다르다면, 새로찾은 액터로 락온 변경
-			else
-			{
-				//기존의 LockOnActor가있으면 OnDestroy Unbind
-				LockOnActor->OnDestroyed.RemoveDynamic(this, &ULockOnComponent::TargetReleased);
-				LockOnActor = NewLockOnActor;
-				LockOnActor->OnDestroyed.AddDynamic(this, &ULockOnComponent::TargetReleased);
-				OnLockOnChanged.Broadcast(GetLockOnActor());
-				UE_LOG(LogTemp, Warning, TEXT("Another Target Locked On %s"), *LockOnActor.Get()->GetName());
-				return;
-			}
-		}
-		else
-		{
-			LockOnActor = NewLockOnActor;
-			LockOnActor->OnDestroyed.AddDynamic(this, &ULockOnComponent::TargetReleased);
-			OnLockOnChanged.Broadcast(GetLockOnActor());
-			UE_LOG(LogTemp, Warning, TEXT("New Target Locked On %s"), *GetLockOnActor()->GetName());
-		}
-	}
-}
-
 void ULockOnComponent::TargetReleased(AActor* Target)
 {
-	UE_LOG(LogTemp, Warning, TEXT("%s LockOnReleased."), *Target->GetName());
-	LockOnActor.Reset();
-
-	OnLockOnChanged.Broadcast(nullptr);
-
-	if (!LockOnActor.IsValid())
+	if (Target != LockOnActor.Get())
 	{
-		UE_LOG(LogTemp, Error, TEXT("LockOnActor is False"));
+		return;
 	}
+	UE_LOG(LogTemp, Warning, TEXT("%s LockOnReleased."), *Target->GetName());
+
+	ChangeTarget(nullptr, true);
 }
 
 AActor* ULockOnComponent::GetLockOnActor()
 {
 	return LockOnActor.Get();
+}
+
+void ULockOnComponent::ChangeTarget(AActor* NewTarget, bool bPreviousTargetIsBeingDestroyed)
+{
+	FString Name_Old = "NULL";
+	FString Name_New = "NULL";
+
+	AActor* Old = LockOnActor.Get();
+	if (Old == NewTarget)
+	{
+		return;
+	}
+	if (IsValid(Old)&& Old->Implements<ULockOnTarget>())
+	{
+		Name_Old = Old->GetName();
+		if (!bPreviousTargetIsBeingDestroyed)
+		{
+			ILockOnTarget::Execute_OnLockReleased(Old);
+			Old->OnDestroyed.RemoveDynamic(this, &ULockOnComponent::TargetReleased);
+			
+		}
+	}
+	LockOnActor = NewTarget;
+	if (LockOnActor.IsValid() && LockOnActor.Get()->Implements<ULockOnTarget>())
+	{
+		Name_New = LockOnActor.Get()->GetName();
+		LockOnActor->OnDestroyed.AddDynamic(this, &ULockOnComponent::TargetReleased);
+		ILockOnTarget::Execute_OnLockedOn(LockOnActor.Get());
+	}
+	OnLockOnChanged.Broadcast(Old, LockOnActor.Get());
+	
+	UE_LOG(LogTemp, Warning, TEXT("Old = %s  ||  New = %s"), *Name_Old, *Name_New);
+}
+
+void ULockOnComponent::ToggleLockOn(FVector PlayerPosition)
+{
+	AActor* NewActor = FindLockOnTarget(PlayerPosition);
+	if (!IsValid(NewActor))
+	{
+		ChangeTarget(nullptr, false);
+		return;
+	}
+	if (NewActor == LockOnActor)
+	{
+		ChangeTarget(nullptr, false);
+		return;
+	}
+
+	ChangeTarget(NewActor, false);
 }
 
 AActor* ULockOnComponent::FindLockOnTarget(FVector PawnLocation)

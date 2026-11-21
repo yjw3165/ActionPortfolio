@@ -6,7 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "LockOnComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLockOnChanged, AActor*, NewTarget);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnLockOnChanged, AActor*, OldTarget, AActor*, NewTarget);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class ACTIONPORTFOLIO_API ULockOnComponent : public UActorComponent
@@ -25,11 +25,12 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	UFUNCTION() void SetTarget(const FVector& FindTargetStartPosition);
-
 	UPROPERTY() TWeakObjectPtr<AActor> LockOnActor;
 	UFUNCTION() void TargetReleased(AActor* Target);
 	AActor* GetLockOnActor();
+
+	UFUNCTION() void ChangeTarget(AActor* NewTarget, bool bPreviousTargetIsBeingDestroyed);
+	UFUNCTION() void ToggleLockOn(FVector PlayerPosition);
 
 	AActor* FindLockOnTarget(FVector PawnLocation);
 	bool IsLockedOn() const;

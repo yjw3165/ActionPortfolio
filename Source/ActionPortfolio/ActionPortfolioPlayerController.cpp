@@ -18,10 +18,13 @@ AActionPortfolioPlayerController::AActionPortfolioPlayerController()
 
 void AActionPortfolioPlayerController::ToggleLockOn()
 {
-	if (IsValid(GetPawn()))
+	/*if (IsValid(GetPawn()))
 	{
 		LockOnComponent->SetTarget(GetPawn()->GetActorLocation());
-	}
+	}*/
+
+	//테스트중.
+	LockOnComponent->ToggleLockOn(GetPawn()->GetActorLocation());
 }
 
 void AActionPortfolioPlayerController::BeginPlay()
