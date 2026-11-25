@@ -8,9 +8,18 @@ ALockOnTestActor::ALockOnTestActor()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	Tags.Add(FName("LockOnTarget"));
-	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
-	RootComponent = MeshComponent;
+
+	//씬 추가.
+	SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"));
+	RootComponent = SceneRoot;
+
+	SkeletalMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMeshComponent"));
+	SkeletalMeshComponent->SetupAttachment(SceneRoot);
+
+	LockOnPoint = CreateDefaultSubobject<USceneComponent>(TEXT("LockOnPoint"));
+	LockOnPoint->SetupAttachment(SceneRoot);
+	LockOnPointMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("LockOnPointMesh"));
+	LockOnPointMesh->SetupAttachment(LockOnPoint);
 
 	static ConstructorHelpers::FObjectFinder<UMaterialInterface> DefaultMaterialAsset(TEXT("/Engine/MapTemplates/Materials/BasicAsset01.BasicAsset01"));
 	static ConstructorHelpers::FObjectFinder<UMaterialInterface> LockOnMaterialAsset(TEXT("/Engine/MapTemplates/Materials/BasicAsset03.BasicAsset03"));
@@ -19,7 +28,7 @@ ALockOnTestActor::ALockOnTestActor()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Success to Load Default Material"));
 		DefaultMaterial = DefaultMaterialAsset.Object;
-		MeshComponent->SetMaterial(0, DefaultMaterialAsset.Object);
+		SkeletalMeshComponent->SetMaterial(0, DefaultMaterialAsset.Object);
 	}
 
 	if (LockOnMaterialAsset.Succeeded())
@@ -54,16 +63,21 @@ void ALockOnTestActor::OnLockReleased_Implementation()
 	ChangeLockOnMaterial(false);
 }
 
+FVector ALockOnTestActor::GetLockOnPointLocation_Implementation() const
+{
+	return LockOnPoint->GetComponentLocation();
+}
+
 void ALockOnTestActor::ChangeLockOnMaterial(bool IsLockedOn)
 {
 	if (IsLockedOn)
 	{
-		MeshComponent->SetMaterial(0, LockedOnMaterial);
+		SkeletalMeshComponent->SetMaterial(0, LockedOnMaterial);
 
 	}
 	else
 	{
-		MeshComponent->SetMaterial(0, DefaultMaterial);
+		SkeletalMeshComponent->SetMaterial(0, DefaultMaterial);
 	}
 }
 

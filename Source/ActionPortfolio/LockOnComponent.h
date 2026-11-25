@@ -27,7 +27,8 @@ public:
 
 	UPROPERTY() TWeakObjectPtr<AActor> LockOnActor;
 	UFUNCTION() void TargetReleased(AActor* Target);
-	AActor* GetLockOnActor();
+	UFUNCTION() FVector GetLockOnLocation();
+	UFUNCTION() AActor* GetLockOnActor();
 
 	UFUNCTION() void ChangeTarget(AActor* NewTarget, bool bPreviousTargetIsBeingDestroyed);
 	UFUNCTION() void ToggleLockOn(FVector PlayerPosition);

@@ -8,24 +8,29 @@
 #include "InputMappingContext.h"
 #include "Blueprint/UserWidget.h"
 #include "ActionPortfolio.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "Kismet/GameplayStatics.h"
 #include "Widgets/Input/SVirtualJoystick.h"
 
 
 AActionPortfolioPlayerController::AActionPortfolioPlayerController()
 {
 	LockOnComponent = CreateDefaultSubobject<ULockOnComponent>(TEXT("LockOnComponent"));
+	
+	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bStartWithTickEnabled = true;
 }
 
 void AActionPortfolioPlayerController::ToggleLockOn()
 {
 	//테스트중.
+	
 	LockOnComponent->ToggleLockOn(GetPawn()->GetActorLocation());
 }
 
 void AActionPortfolioPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
-
 	// only spawn touch controls on local player controllers
 	if (IsLocalPlayerController() && ShouldUseTouchControls())
 	{
@@ -43,6 +48,34 @@ void AActionPortfolioPlayerController::BeginPlay()
 
 		}
 
+	}
+
+	if (IsValid(LockOnComponent))
+	{
+		LockOnComponent->OnLockOnChanged.AddDynamic(this, &AActionPortfolioPlayerController::HandleLockOnChanged);
+	}
+	
+}
+
+void AActionPortfolioPlayerController::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (LockOnComponent->GetLockOnActor() != nullptr)
+	{
+		if (GetPawn() != nullptr)
+		{
+			//컨트롤러회전 Pitch 클램프 제한.
+			FRotator ControllerRotator = UKismetMathLibrary::FindLookAtRotation(GetPawn()->GetActorLocation(),
+				LockOnComponent->GetLockOnLocation());
+
+			ControllerRotator.Pitch = ControllerRotator.Pitch + CameraPitchOffset;
+			ControllerRotator.Pitch = FMath::Clamp(ControllerRotator.Pitch, CameraPitchClamp_Min, CameraPitchClamp_Max);
+			
+			SetControlRotation(
+				FMath::RInterpTo(GetControlRotation(), ControllerRotator, DeltaTime, LockOnCameraMoveSpeed)
+			);
+		}
 	}
 }
 
@@ -81,4 +114,28 @@ bool AActionPortfolioPlayerController::ShouldUseTouchControls() const
 {
 	// are we on a mobile platform? Should we force touch?
 	return SVirtualJoystick::ShouldDisplayTouchInterface() || bForceTouchControls;
+}
+
+void AActionPortfolioPlayerController::HandleLockOnChanged(AActor* OldTarget, AActor* NewTarget)
+{	
+	if (OldTarget != nullptr && NewTarget == nullptr)
+	{
+
+		UE_LOG(LogTemp, Warning, TEXT("LOCK ON END"));
+		SetIgnoreLookInput(false);
+		return;
+	}
+
+	if (OldTarget == nullptr&& NewTarget != nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("LOCK ON START"));
+		SetIgnoreLookInput(true);
+		return;
+	}
+
+	if (OldTarget != nullptr && NewTarget != nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Switching LOCK ON"));
+		return;
+	}
 }

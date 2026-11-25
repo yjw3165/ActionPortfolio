@@ -46,6 +46,15 @@ void ULockOnComponent::TargetReleased(AActor* Target)
 	ChangeTarget(nullptr, true);
 }
 
+FVector ULockOnComponent::GetLockOnLocation()
+{
+	if (GetLockOnActor() == nullptr)
+	{
+		return FVector::ZeroVector;
+	}
+	return ILockOnTarget::Execute_GetLockOnPointLocation(GetLockOnActor());
+}
+
 AActor* ULockOnComponent::GetLockOnActor()
 {
 	return LockOnActor.Get();
@@ -102,10 +111,11 @@ void ULockOnComponent::ToggleLockOn(FVector PlayerPosition)
 
 AActor* ULockOnComponent::FindLockOnTarget(FVector PawnLocation)
 {
-	FName Tag = FName("LockOnTarget");
+	//FName Tag = FName("LockOnTarget");
 	TArray<AActor*> FoundActors;
 	AActor* NewLockOnActor = nullptr;
-	UGameplayStatics::GetAllActorsOfClassWithTag(GetWorld(), AActor::StaticClass(), Tag, FoundActors);
+	UGameplayStatics::GetAllActorsWithInterface(GetWorld(), ULockOnTarget::StaticClass(), FoundActors);
+	//UGameplayStatics::GetAllActorsOfClassWithTag(GetWorld(), AActor::StaticClass(), Tag, FoundActors);
 	if (FoundActors.IsValidIndex(0))
 	{
 		for (AActor* FoundActor : FoundActors)

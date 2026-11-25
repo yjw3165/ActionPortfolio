@@ -26,9 +26,16 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	UPROPERTY(VisibleAnywhere, Category = "Scene")
+	USceneComponent* SceneRoot;
 
-	UPROPERTY(VisibleAnywhere, Category= "Mesh")
-	UStaticMeshComponent* MeshComponent;
+	UPROPERTY(VisibleAnywhere,Category = "Scene")
+	USceneComponent* LockOnPoint;
+	UPROPERTY(VisibleAnywhere,Category = "Scene")
+	UMeshComponent* LockOnPointMesh;
+
+	UPROPERTY(VisibleAnywhere, Category= "Scene")
+	USkeletalMeshComponent* SkeletalMeshComponent;
 
 	UPROPERTY(EditAnywhere, Category = "Material")
 	UMaterialInterface* DefaultMaterial;
@@ -38,7 +45,8 @@ public:
 
 	virtual void OnLockedOn_Implementation() override;
 	virtual void OnLockReleased_Implementation() override;
-
+	virtual FVector GetLockOnPointLocation_Implementation() const override;
+	
 private:
 	void ChangeLockOnMaterial(bool IsLockedOn);
 
