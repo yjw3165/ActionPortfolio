@@ -10,6 +10,8 @@
 #include "ActionPortfolio.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/GameplayStatics.h"
+#include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Widgets/Input/SVirtualJoystick.h"
 
 
@@ -30,6 +32,7 @@ void AActionPortfolioPlayerController::ToggleLockOn()
 
 void AActionPortfolioPlayerController::BeginPlay()
 {
+	
 	Super::BeginPlay();
 	// only spawn touch controls on local player controllers
 	if (IsLocalPlayerController() && ShouldUseTouchControls())
@@ -123,6 +126,14 @@ void AActionPortfolioPlayerController::HandleLockOnChanged(AActor* OldTarget, AA
 
 		UE_LOG(LogTemp, Warning, TEXT("LOCK ON END"));
 		SetIgnoreLookInput(false);
+
+		ACharacter* PlayerCharacter = Cast<ACharacter>(GetPawn());
+		if (PlayerCharacter != nullptr)
+		{
+			PlayerCharacter->GetCharacterMovement()->bOrientRotationToMovement = true;
+			PlayerCharacter->GetCharacterMovement()->bUseControllerDesiredRotation = false;
+		}
+		
 		return;
 	}
 
@@ -130,6 +141,14 @@ void AActionPortfolioPlayerController::HandleLockOnChanged(AActor* OldTarget, AA
 	{
 		UE_LOG(LogTemp, Warning, TEXT("LOCK ON START"));
 		SetIgnoreLookInput(true);
+
+		ACharacter* PlayerCharacter = Cast<ACharacter>(GetPawn());
+		if (PlayerCharacter != nullptr)
+		{
+			PlayerCharacter->GetCharacterMovement()->bOrientRotationToMovement = false;
+			PlayerCharacter->GetCharacterMovement()->bUseControllerDesiredRotation = true;
+		}
+
 		return;
 	}
 
