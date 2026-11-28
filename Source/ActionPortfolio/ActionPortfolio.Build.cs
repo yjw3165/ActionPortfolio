@@ -18,7 +18,11 @@ public class ActionPortfolio : ModuleRules
 			"StateTreeModule",
 			"GameplayStateTreeModule",
 			"UMG",
-			"Slate"
+			"Slate",
+			"GameplayAbilities",
+			"GameplayTags",
+			"GameplayTasks"
+
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] { });

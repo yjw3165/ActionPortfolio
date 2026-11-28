@@ -10,6 +10,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "AbilitySystemComponent.h"
 #include "ActionPortfolio.h"
 
 AActionPortfolioCharacter::AActionPortfolioCharacter()
@@ -48,6 +49,17 @@ AActionPortfolioCharacter::AActionPortfolioCharacter()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
+
+	/* GAS TEST CODE*/
+	ASC = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
+	CombatAttributeSet = CreateDefaultSubobject<UCombatAttributeSet>(TEXT("CombatAttributeSet"));
+}
+
+void AActionPortfolioCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	ASC->InitAbilityActorInfo(this, this);
 }
 
 void AActionPortfolioCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -130,4 +142,9 @@ void AActionPortfolioCharacter::DoJumpEnd()
 {
 	// signal the character to stop jumping
 	StopJumping();
+}
+
+UAbilitySystemComponent* AActionPortfolioCharacter::GetAbilitySystemComponent() const
+{
+	return ASC.Get();
 }

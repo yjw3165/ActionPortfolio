@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
+#include "AbilitySystemInterface.h"
+#include "CombatAttributeSet.h"
 #include "ActionPortfolioCharacter.generated.h"
 
 class USpringArmComponent;
@@ -19,7 +21,7 @@ DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
  *  Implements a controllable orbiting camera
  */
 UCLASS(abstract)
-class AActionPortfolioCharacter : public ACharacter
+class AActionPortfolioCharacter : public ACharacter , public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
@@ -53,7 +55,7 @@ public:
 
 	/** Constructor */
 	AActionPortfolioCharacter();	
-
+	virtual void BeginPlay() override;
 protected:
 
 	/** Initialize input action bindings */
@@ -92,5 +94,15 @@ public:
 
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+/* GAS TEST */
+protected:
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UAbilitySystemComponent> ASC;
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UCombatAttributeSet> CombatAttributeSet;
+
+public:
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 };
 
